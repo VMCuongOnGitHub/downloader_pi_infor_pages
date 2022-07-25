@@ -20,13 +20,14 @@ option.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleW
 SEQUENCE = r"offline_webpage/page_source"
 driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=option)
 
-pis = ["rallek", "miyoshi", "reinhardtcoetzee", "sharonconnolly", "cphequities", "rubymza", "richardstroud", "ingruc", "pino428", "triangulacapital", "jordenboer", "slow_and_steady", "monabel", "emge2116", "doopiecash", "magic_kaito", "ioatri",
+popular_investors = ["rallek", "miyoshi", "reinhardtcoetzee", "sharonconnolly", "cphequities", "rubymza", "richardstroud", "ingruc", "pino428", "triangulacapital", "jordenboer", "slow_and_steady", "monabel", "emge2116", "doopiecash", "magic_kaito", "ioatri",
        "balticseal", "daniel4653", "fifty-five", "calintrading", "sgstjc", "greatcompanies", "karlo_s", "lukaszkisicki", "trojaneto", "chiay0327", "carlos_delarosa", "trex8u247", "estebanopatril", "nintingale", "taherkamari", "zofesu",
       "andreamarcon16", "nestorarmstrong", "bhavesh_spx", "theosanders", "dividends_income", "andresvicunat", "tomwintjes", "nicoroumeau", "mjtfernandez", "myhungetoro", "maxdividend", "victorvatin",
       "aguero1010", "ilakha", "beatthemarketz", "acetoandrea", "jacksmann", "renoi974", "tomchapman1979", "axisnet", "imbolex", "thinhleduc", "jianswang", "marianopardo", "wesl3y", "hyjbrighter", "misterg23", "ligkclaw",
       "alexandrucinca", "rubymza", "jaynemesis", "gserdan", "tradefx525", "eddyb123", "returninvest", "matanspalatrin1", "lee88eng", "bamboo108", "liborvasa", "jeppekirkbonde", "liamdavies", "arash007", "canzhao", "knw500",
       "thibautr", "fundmanagerzech", "sashok281", "alnayef", "campervans", "pizarrosaul", "sandra31168", "social-investor", "prototypevr", "harryh1993", "vidovm", "meldow", "robertunger", "sparkliang", "abbroush",
-      "abeershahid", "coolcontribution", "chocowin"]
+      "abeershahid", "coolcontribution", "chocowin", "vladd35", "aukie2008", "noasnoas", "b--art", "simonneau"]
+# popular_investors = ["pizarrosaul"]
 
 datetime_now = datetime.today().strftime('%m-%d-%Y-h%H')
 directory = r"offline_webpage/" + datetime_now
@@ -36,8 +37,11 @@ if not os.path.exists(directory):
 number_of_record = 0
 final_profile = ""
 fail_pages = ""
+name_check = ""
+rank_check = ""
+
 print("Begin crawling: " + str(len(pis)))
-for pi in pis:
+for pi in popular_investors:
       time.sleep(2)
       try:
             driver.get("https://www.etoro.com/people/" + pi + "/stats")
@@ -68,7 +72,40 @@ for pi in pis:
                   print("Error: " + str(e))
                   fail_pages += pi + ", "
 
-      number_of_record += 1
+      try:
+            name_check = driver.find_element(By.XPATH, "//h1[@automation-id='user-head-not-nickname']").text
+      except NoSuchElementException:
+            name_check = ""
+
+      try:
+            name_check = driver.find_element(By.XPATH, "//h1[@automation-id='user-head-nickname']").text
+      except NoSuchElementException:
+            name_check = ""
+
+      try:
+            rank_check = driver.find_element(By.XPATH, "//*[contains(@class,'risk-default')]").text
+      except NoSuchElementException:
+            rank_check = ""
+
+      try:
+            rank_check = driver.find_element(By.XPATH, "//*[contains(@class,'risk-label')]").get_attribute("class")
+      except NoSuchElementException:
+            rank_check = ""
+
+      try:
+            rank_check = driver.find_element(By.XPATH, "//*[contains(@class,'risk-label')]").get_attribute("class")
+      except NoSuchElementException:
+            rank_check = ""
+
+      print("name_check: " + name_check)
+      print("rank_check: " + rank_check)
+
+      if len(name_check) != "" and len(rank_check) != "":
+            number_of_record += 1
+      else:
+            fail_pages += pi + ", "
+            print("failed crawl: " + pi)
+
 
 
 print("Report: \n" +
